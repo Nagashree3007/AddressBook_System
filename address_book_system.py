@@ -4,7 +4,7 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC3-Ability to edit existing contact person using their Name
+@Title: UC3-Ability to delete a person using person's name 
 
 """
 
@@ -109,6 +109,19 @@ class AddressBook:
         print("\n-----------------Updated Contact Details:------------")
         print(contact.display_contact())
         print("-----------------------------------------------------")
+#UC4-----------Deletes a contact from the address book by name.------------------    
+    def delete_contact(self, name):
+        """
+        Definition: Deletes the contact with the given name.
+        Parameter: name (str) - The name of the contact to delete.
+        Return: None
+        
+        """
+        if name in self.contacts:
+            del self.contacts[name]
+            print(f"Contact '{name}' has been deleted.")
+        else:
+            print("Contact not found.")
 
     def edit_contact(self, name):
         """
@@ -118,6 +131,10 @@ class AddressBook:
         Return: None (updates the contact's details).
         
         """
+        if not self.contacts:
+            print("No contacts available to edit.")
+            return
+    
         if name in self.contacts:
             contact = self.contacts[name]
             while True:
@@ -170,13 +187,20 @@ class AddressBook:
                 print(contact.display_contact())
 
 def main_menu(address_book):
-    #Displays the main menu and handles user choices.
+    '''
+    
+    Definition: Displays options to the user and processes their choice.
+    Parameter: address_book (AddressBook) - The address book to manage.
+    Return: None
+    
+    '''
     while True:
-        print("-------------------------------------------------")
+        print("-------------------------------------------------\n")
         print("1. Add Contact")
         print("2. Edit Contact")
-        print("3. Display Contacts")
-        print("4. Exit")
+        print("3. Delete Contact")
+        print("4. Display Contacts")
+        print("5. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -203,18 +227,28 @@ def main_menu(address_book):
 
             address_book.add_contact(contact)
         elif choice == "2":
-            name = input("Enter the name of the contact to edit: ")
-            address_book.edit_contact(name)
-            
+            if not address_book.contacts:
+                print('--------------------------------')
+                print("No contacts available to edit.")
+            else:
+                name = input("Enter the name of the contact to edit: ")
+                address_book.edit_contact(name)
         elif choice == "3":
+            if not address_book.contacts:
+                print('--------------------------------')
+                print("No contacts available to delete.")
+            else:
+                name = input("Enter the name of the contact to delete: ")
+                address_book.delete_contact(name)
+        elif choice == "4":
             print("\n-----------------Contacts in Address Book:------------")
             address_book.display_contacts()
-        elif choice == "4":
+        elif choice == "5":
             print("-------------------Exiting address book.------------------")
             break
         else:
             print("Invalid choice. Please try again.")
-
-# Example usage
+            
+            
 address_book = AddressBook()
 main_menu(address_book)
