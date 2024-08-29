@@ -4,7 +4,7 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC4-Ability to delete a person using person's name 
+@Title: UC5-Ability to add multiple person to Address Book
 
 """
 
@@ -202,30 +202,36 @@ def main_menu(address_book):
         print("4. Display Contacts")
         print("5. Exit")
         choice = input("Enter your choice: ")
-
+        #UC5----------- Ability to add multiple person to Address Book----------------  
         if choice == "1":
-            print("Enter contact details:")
-            first_name = input("First Name: ")
-            last_name = input("Last Name: ")
-            address = input("Address: ")
-            city = input("City: ")
-            state = input("State: ")
-            zip_code = get_integer_input("ZIP Code: ")
-            phone_number = get_integer_input("Phone Number: ")
-            email = input("Email: ")
+            while True:
+                print("\nEnter contact details:")
+                first_name = input("First Name: ")
+                last_name = input("Last Name: ")
+                address = input("Address: ")
+                city = input("City: ")
+                state = input("State: ")
+                zip_code = get_integer_input("ZIP Code: ")
+                phone_number = get_integer_input("Phone Number: ")
+                email = input("Email: ")
 
-            contact = Contact(
-                first_name=first_name,
-                last_name=last_name,
-                address=address,
-                city=city,
-                state=state,
-                zip_code=zip_code,
-                phone_number=phone_number,
-                email=email
-            )
+                contact = Contact(
+                    first_name=first_name,
+                    last_name=last_name,
+                    address=address,
+                    city=city,
+                    state=state,
+                    zip_code=zip_code,
+                    phone_number=phone_number,
+                    email=email
+                )
 
-            address_book.add_contact(contact)
+                address_book.add_contact(contact)
+                
+                # Check if the user wants to add another contact
+                another = input("Do you want to add another contact? (yes/no): ").strip().lower()
+                if another != 'yes':
+                    break
         elif choice == "2":
             if not address_book.contacts:
                 print('--------------------------------')
