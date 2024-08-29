@@ -1,20 +1,30 @@
+'''
+    @Author:Nagashree C R
+    @Date: 29-08-2024
+    @Last Modified by:Nagashree C R
+    @Last Modified: 29-08-2024
+    @Title : UC1-Ability to create a Contacts in Address Book with first and last names, address,city, state, zip, phone number and email...
+
+'''
 class Contact:
     #Represents a contact in the address book.
     def __init__(self, first_name, last_name, address, city, state, zip_code, phone_number, email):
         self.first_name = first_name
         self.last_name = last_name
         self.address = address
-        self.city = city
-        self.state = state
+        self.city = city 
+        self.state = state 
         self.zip_code = zip_code
         self.phone_number = phone_number
         self.email = email
 
     def display_contact(self):
         """
+        
         Definition:Display the details
         parameter:None
         Return: Returns a formatted string of the contact's details.
+        
         """
         return (f"Name: {self.first_name} {self.last_name}\n"
                 f"Address: {self.address}\n"
@@ -26,9 +36,11 @@ class Contact:
 
 def get_integer_input(prompt):
     """
+    
     Definition:Prompts the user for an integer input 
     parameter:None
     Return: returns the integer value.
+    
     """
     while True:
         try:
@@ -53,8 +65,8 @@ contact = Contact(
     last_name=last_name,
     address=address,
     city=city,
-    state=state,
-    zip_code=zip_code,
+    state=state, 
+    zip_code=zip_code,     
     phone_number=phone_number,
     email=email
 )
