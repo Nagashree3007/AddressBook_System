@@ -26,7 +26,8 @@ class Contact:
         Return: Returns a formatted string of the contact's details.
         
         """
-        return (f"Name: {self.first_name} {self.last_name}\n"
+        return (
+            f"Name: {self.first_name} {self.last_name}\n"
                 f"Address: {self.address}\n"
                 f"City: {self.city}\n"
                 f"State: {self.state}\n"
@@ -70,6 +71,31 @@ contact = Contact(
     phone_number=phone_number,
     email=email
 )
+
+
+#Manages contacts in a specific address book.
+class AddressBook:
+    def __init__(self, name):
+        self.name = name
+        self.contacts = {}
+
+    def add_contact(self, contact):
+        """
+        
+        Definition:Adds a new contact to the address book.
+        
+        parameter:contact details
+        
+        Return:None
+        
+        """
+        self.contacts[contact.first_name] = contact
+        print("Contact added successfully.")
+
+#
+address_book = AddressBook(name="MyAddressBook")
+address_book.add_contact(contact)
+
 
 # Displaying the contact details
 print("\n--------------Contact Details:---------------")
