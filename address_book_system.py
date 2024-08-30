@@ -4,15 +4,12 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC5-Ability to add multiple person to Address Book
+@Title: UC6-Ability to add multiple Address Book
 
 """
 
-
-#---UC1--Ability to create a Contacts in Address Book with first and last names, address, city, state, zip, phone number and email...
-
 class Contact:
-    #Represents a contact in the address book.
+    # Represents a contact in the address book.
     def __init__(self, first_name, last_name, address, city, state, zip_code, phone_number, email):
         self.first_name = first_name
         self.last_name = last_name
@@ -25,11 +22,9 @@ class Contact:
 
     def display_contact(self):
         """
-        
-        Definition:Display the details
-        parameter:None
+        Definition: Display the details.
+        Parameter: None
         Return: Returns a formatted string of the contact's details.
-        
         """
         return (f"Name: {self.first_name} {self.last_name}\n"
                 f"Address: {self.address}\n"
@@ -41,34 +36,26 @@ class Contact:
 
 def get_integer_input(prompt):
     """
-    
-    Definition:Prompts the user for an integer input 
-    parameter:None
+    Definition: Prompts the user for an integer input.
+    Parameter: prompt (str) - The prompt to display to the user.
     Return: returns the integer value.
-    
     """
     while True:
         try:
             return int(input(prompt))
         except ValueError:
             print("Invalid input. Please enter a valid integer.")
-            
-#UC2--------Manages contacts in a specific address book.------------------------
 
 class AddressBook:
-    #Manages contacts in a single address book.
+    # Manages contacts in a single address book.
     def __init__(self):
         self.contacts = {}
 
     def add_contact(self, contact):
         """
-        
-        Definition:Adds a new contact to the address book.
-        
-        parameter:contact details
-        
-        Return:None
-        
+        Definition: Adds a new contact to the address book.
+        Parameter: contact (Contact) - The contact to add.
+        Return: None
         """
         if contact.first_name in self.contacts:
             print("Contact already exists.")
@@ -77,14 +64,9 @@ class AddressBook:
             print('----------------------------')
             print("Contact added successfully.")
 
-#---------UC3---Ability to edit existing contact person using their name-----
-
-
     def update_and_display_contact(self, contact, field_name, new_value):
         """
         Updates a specific field of a contact and displays the updated contact details.
-        
-        Definition: Updates a specific field of the contact and prints the updated details.
         Parameter: contact (Contact) - The contact to update.
                    field_name (str) - The field to update.
                    new_value (str or int) - The new value for the field.
@@ -109,13 +91,12 @@ class AddressBook:
         print("\n-----------------Updated Contact Details:------------")
         print(contact.display_contact())
         print("-----------------------------------------------------")
-#UC4-----------Deletes a contact from the address book by name.------------------    
+
     def delete_contact(self, name):
         """
         Definition: Deletes the contact with the given name.
         Parameter: name (str) - The name of the contact to delete.
         Return: None
-        
         """
         if name in self.contacts:
             del self.contacts[name]
@@ -125,11 +106,9 @@ class AddressBook:
 
     def edit_contact(self, name):
         """
-        
-        Definition:Edits an existing contact by name.
-        parameter: name (str)-The name of the contact to be edited.
+        Definition: Edits an existing contact by name.
+        Parameter: name (str) - The name of the contact to be edited.
         Return: None (updates the contact's details).
-        
         """
         if not self.contacts:
             print("No contacts available to edit.")
@@ -173,12 +152,12 @@ class AddressBook:
                     print("Invalid choice. Please try again.")
         else:
             print("Contact not found.")
+
     def display_contacts(self):
         """
         Definition: Displays all contacts in the address book.
         Parameter: None
         Return: None
-        
         """
         if not self.contacts:
             print("No contacts available.")
@@ -186,14 +165,77 @@ class AddressBook:
             for contact in self.contacts.values():
                 print(contact.display_contact())
 
-def main_menu(address_book):
-    '''
-    
+class AddressBookManager:
+    def __init__(self):
+        self.address_books = {}
+
+    def add_address_book(self, name):
+        """
+        Definition: Adds a new address book with the given name.
+        Parameter: name (str) - The name of the address book.
+        Return: None
+        """
+        if name in self.address_books:
+            print("Address book with this name already exists.")
+        else:
+            self.address_books[name] = AddressBook()
+            print(f"Address book '{name}' added successfully.")
+
+    def get_address_book(self, name):
+        """
+        Definition: Retrieves the address book with the given name.
+        Parameter: name (str) - The name of the address book.
+        Return: AddressBook - The address book associated with the name.
+        """
+        return self.address_books.get(name, None)
+
+def main_menu(manager):
+    """
     Definition: Displays options to the user and processes their choice.
-    Parameter: address_book (AddressBook) - The address book to manage.
+    Parameter: manager (AddressBookManager) - The address book manager.
     Return: None
-    
-    '''
+    """
+    while True:
+        print("-------------------------------------------------\n")
+        print("1. Add Address Book")
+        print("2. Select Address Book")
+        print("3. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            name = input("Enter the name of the new address book: ")
+            manager.add_address_book(name)
+        elif choice == "2":
+            if not manager.address_books:
+                print("No address books available.")
+                continue
+
+            print("Available Address Books:")
+            for index, name in enumerate(manager.address_books.keys(), start=1):
+                print(f"{index}. {name}")
+
+            index = get_integer_input("Enter the number of the address book to select: ") - 1
+            names = list(manager.address_books.keys())
+
+            if 0 <= index < len(names):
+                selected_name = names[index]
+                address_book = manager.get_address_book(selected_name)
+                if address_book:
+                    address_book_menu(address_book)
+            else:
+                print("Invalid selection. Please try again.")
+        elif choice == "3":
+            print("-------------------Exiting system.------------------")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def address_book_menu(address_book):
+    """
+    Definition: Displays options to manage the selected address book.
+    Parameter: address_book (AddressBook) - The selected address book.
+    Return: None
+    """
     while True:
         print("-------------------------------------------------\n")
         print("1. Add Contact")
@@ -202,7 +244,7 @@ def main_menu(address_book):
         print("4. Display Contacts")
         print("5. Exit")
         choice = input("Enter your choice: ")
-        #UC5----------- Ability to add multiple person to Address Book----------------  
+
         if choice == "1":
             while True:
                 print("\nEnter contact details:")
@@ -227,34 +269,34 @@ def main_menu(address_book):
                 )
 
                 address_book.add_contact(contact)
-                
-                # Check if the user wants to add another contact
-                another = input("Do you want to add another contact? (yes/no): ").strip().lower()
-                if another != 'yes':
+                more = input("Add another contact? (y/n): ").strip().lower()
+                if more != 'y':
                     break
+
         elif choice == "2":
             if not address_book.contacts:
-                print('--------------------------------')
                 print("No contacts available to edit.")
-            else:
-                name = input("Enter the name of the contact to edit: ")
-                address_book.edit_contact(name)
+                continue
+            name = input("Enter the name of the contact to edit: ")
+            address_book.edit_contact(name)
+
         elif choice == "3":
             if not address_book.contacts:
-                print('--------------------------------')
                 print("No contacts available to delete.")
-            else:
-                name = input("Enter the name of the contact to delete: ")
-                address_book.delete_contact(name)
+                continue
+            name = input("Enter the name of the contact to delete: ")
+            address_book.delete_contact(name)
+
         elif choice == "4":
-            print("\n-----------------Contacts in Address Book:------------")
             address_book.display_contacts()
+
         elif choice == "5":
-            print("-------------------Exiting address book.------------------")
+            print("Exiting address book management.")
             break
+
         else:
             print("Invalid choice. Please try again.")
-            
-            
-address_book = AddressBook()
-main_menu(address_book)
+
+if __name__ == "__main__":
+    manager = AddressBookManager()
+    main_menu(manager)
