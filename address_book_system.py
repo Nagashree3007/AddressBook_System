@@ -4,7 +4,8 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC9-Ability to view Persons by City or State
+@Title: UC10-Ability to get number of contact persons i.e. count by City or State
+
 """
 
 class Contact:
@@ -176,20 +177,22 @@ class AddressBook:
     def view_contacts_by_city(self, city):
         contacts = self.city_dict.get(city, None)
         if contacts:
-            print(f"Contacts in {city}:")
+            print(f"Contacts in {city} ({len(contacts)}):")
             for contact in contacts:
                 print(contact.display_contact())
         else:
             print(f"No contacts found in {city}.")
+        print(f"Total contacts in {city}: {len(contacts) if contacts else 0}")
 
     def view_contacts_by_state(self, state):
         contacts = self.state_dict.get(state, None)
         if contacts:
-            print(f"Contacts in {state}:")
+            print(f"Contacts in {state} ({len(contacts)}):")
             for contact in contacts:
                 print(contact.display_contact())
         else:
             print(f"No contacts found in {state}.")
+        print(f"Total contacts in {state}: {len(contacts) if contacts else 0}")
 
 class AddressBookManager:
     def __init__(self):
