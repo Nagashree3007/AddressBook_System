@@ -4,9 +4,11 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC12-Ability to sort the entries in the address book by City, State, or Zip
+@Title: UC13-Ability to Read or Write the Address Book with Persons Contact into a File using File IO
+
 """
 
+import json
 from collections import defaultdict
 
 class Contact:
@@ -34,6 +36,31 @@ class Contact:
                 f"Zip Code: {self.zip_code}\n"
                 f"Phone Number: {self.phone_number}\n"
                 f"Email: {self.email}\n")
+
+    def to_dict(self):
+        return {
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "address": self.address,
+            "city": self.city,
+            "state": self.state,
+            "zip_code": self.zip_code,
+            "phone_number": self.phone_number,
+            "email": self.email
+        }
+
+    @staticmethod
+    def from_dict(data):
+        return Contact(
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            address=data["address"],
+            city=data["city"],
+            state=data["state"],
+            zip_code=data["zip_code"],
+            phone_number=data["phone_number"],
+            email=data["email"]
+        )
 
 def get_integer_input(prompt):
     while True:
@@ -212,6 +239,44 @@ class AddressBook:
             print(f"No contacts found in {state}.")
         print(f"Total contacts in {state}: {len(contacts) if contacts else 0}")
 
+    def save_to_file(self, filename):
+        data = {
+            "contacts": [contact.to_dict() for contact in self.contacts.values()],
+            "city_dict": {city: [contact.to_dict() for contact in contacts] for city, contacts in self.city_dict.items()},
+            "state_dict": {state: [contact.to_dict() for contact in contacts] for state, contacts in self.state_dict.items()},
+            "zip_code_dict": {zip_code: [contact.to_dict() for contact in contacts] for zip_code, contacts in self.zip_code_dict.items()}
+        }
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    def load_from_file(self, filename):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+        
+        self.contacts = {}
+        self.city_dict = defaultdict(set)
+        self.state_dict = defaultdict(set)
+        self.zip_code_dict = defaultdict(set)
+
+        for contact_data in data["contacts"]:
+            contact = Contact.from_dict(contact_data)
+            self.add_contact(contact)
+
+        for city, contacts in data["city_dict"].items():
+            for contact_data in contacts:
+                contact = Contact.from_dict(contact_data)
+                self.city_dict[city].add(contact)
+
+        for state, contacts in data["state_dict"].items():
+            for contact_data in contacts:
+                contact = Contact.from_dict(contact_data)
+                self.state_dict[state].add(contact)
+
+        for zip_code, contacts in data["zip_code_dict"].items():
+            for contact_data in contacts:
+                contact = Contact.from_dict(contact_data)
+                self.zip_code_dict[zip_code].add(contact)
+
 class AddressBookManager:
     def __init__(self):
         self.address_books = {}
@@ -238,7 +303,7 @@ def main_menu(manager):
 
         if choice == "1":
             name = input("Enter the name of the new address book: ")
-            manager.add_address_book(name) 
+            manager.add_address_book(name)
         elif choice == "2":
             if not manager.address_books:
                 print("No address books available.")
@@ -274,7 +339,9 @@ def address_book_menu(address_book):
         print("5. View Contacts by City")
         print("6. View Contacts by State")
         print("7. Sort Contacts")
-        print("8. Exit")
+        print("8. Save Address Book to File")
+        print("9. Load Address Book from File")
+        print("10. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -341,6 +408,14 @@ def address_book_menu(address_book):
             else:
                 print("Invalid choice. Please try again.")
         elif choice == "8":
+            filename = input("Enter filename to save address book: ")
+            address_book.save_to_file(filename)
+            print(f"Address book saved to {filename}.")
+        elif choice == "9":
+            filename = input("Enter filename to load address book from: ")
+            address_book.load_from_file(filename)
+            print(f"Address book loaded from {filename}.")
+        elif choice == "10":
             print("-------------------Exiting Address Book Menu.------------------")
             break
         else:
