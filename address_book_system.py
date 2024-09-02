@@ -4,10 +4,10 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC14-Ability to Read or Write the Address Book with Persons Contact into a CSV File 
+@Title: UC15-Ability to Read or Write the Address Book with Persons Contact into a Json File 
 
 """
-import csv
+import json
 from collections import defaultdict
 
 class Contact:
@@ -240,32 +240,20 @@ class AddressBook:
             print(f"No contacts found in {state}.")
         print(f"Total contacts in {state}: {len(contacts) if contacts else 0}")
 
-    def save_to_csv(self, filename):
-        with open(filename, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["first_name", "last_name", "address", "city", "state", "zip_code", "phone_number", "email"])
-            for contact in self.contacts.values():
-                writer.writerow([contact.first_name, contact.last_name, contact.address, contact.city, contact.state, contact.zip_code, contact.phone_number, contact.email])
+    def save_to_json(self, filename):
+        with open(filename, 'w') as file:
+            json.dump({name: contact.to_dict() for name, contact in self.contacts.items()}, file, indent=4)
 
-    def load_from_csv(self, filename):
+    def load_from_json(self, filename):
         self.contacts = {}
         self.city_dict.clear()
         self.state_dict.clear()
         self.zip_code_dict.clear()
 
         with open(filename, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                contact = Contact(
-                    first_name=row["first_name"],
-                    last_name=row["last_name"],
-                    address=row["address"],
-                    city=row["city"],
-                    state=row["state"],
-                    zip_code=row["zip_code"],
-                    phone_number=row["phone_number"],
-                    email=row["email"]
-                )
+            data = json.load(file)
+            for name, contact_data in data.items():
+                contact = Contact.from_dict(contact_data)
                 self.add_contact(contact)
 
 
@@ -333,8 +321,8 @@ def address_book_menu(address_book):
         print("5. View Contacts by City")
         print("6. View Contacts by State")
         print("7. Sort Contacts")
-        print("8. Save Address Book to File")
-        print("9. Load Address Book from File")
+        print("8. Save Address Book to JSON File")
+        print("9. Load Address Book from JSON File")
         print("10. Exit")
         choice = input("Enter your choice: ")
 
@@ -402,12 +390,12 @@ def address_book_menu(address_book):
             else:
                 print("Invalid choice. Please try again.")
         elif choice == "8":
-            filename = input("Enter filename to save address book: ")
-            address_book.save_to_csv(filename)
+            filename = input("Enter filename to save address book (JSON): ")
+            address_book.save_to_json(filename)
             print(f"Address book saved to {filename}.")
         elif choice == "9":
-            filename = input("Enter filename to load address book from: ")
-            address_book.load_from_csv(filename)
+            filename = input("Enter filename to load address book from (JSON): ")
+            address_book.load_from_json(filename)
             print(f"Address book loaded from {filename}.")
         elif choice == "10":
             print("-------------------Exiting Address Book Menu.------------------")
