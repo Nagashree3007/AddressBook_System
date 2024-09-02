@@ -1,3 +1,22 @@
-first_name,last_name,address,city,state,zip_code,phone_number,email
-wde,wdefv,azxsc,wwsdc,dfcvb  ,123,12,dc
-sxd,sd,edfg,wedre,erf,232,12,cv d
+{
+    "qwsdec": {
+        "first_name": "qwsdec",
+        "last_name": "2w3der",
+        "address": "2qwed",
+        "city": "q2weds",
+        "state": "qwds",
+        "zip_code": 12,
+        "phone_number": 12,
+        "email": "dfcv"
+    },
+    "dcf": {
+        "first_name": "dcf",
+        "last_name": "dce",
+        "address": "defv",
+        "city": "cf v",
+        "state": "edrfc",
+        "zip_code": 12,
+        "phone_number": 12,
+        "email": "v "
+    }
+}
