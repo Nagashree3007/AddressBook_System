@@ -4,11 +4,10 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC13-Ability to Read or Write the Address Book with Persons Contact into a File using File IO
+@Title: UC14-Ability to Read or Write the Address Book with Persons Contact into a CSV File 
 
 """
-
-import json
+import csv
 from collections import defaultdict
 
 class Contact:
@@ -62,6 +61,7 @@ class Contact:
             email=data["email"]
         )
 
+
 def get_integer_input(prompt):
     while True:
         try:
@@ -77,27 +77,27 @@ class AddressBook:
         self.zip_code_dict = defaultdict(set)
 
     def add_contact(self, contact):
-        if contact.first_name in self.contacts:
-            existing_contact = self.contacts[contact.first_name]
-            if existing_contact == contact:
-                print("Contact already exists.")
-                return
+        if contact.first_name in self.contacts and self.contacts[contact.first_name] == contact:
+            print("Contact already exists.")
+            return
         
-        self._update_contact_dictionaries(contact)
-        self.contacts[contact.first_name] = contact
+        self._remove_old_contact(contact)
+        self._add_new_contact(contact)
         print('----------------------------')
         print("Contact added successfully.")
 
-    def _update_contact_dictionaries(self, contact):
+    def _remove_old_contact(self, contact):
         if contact.first_name in self.contacts:
             old_contact = self.contacts[contact.first_name]
             self.city_dict[old_contact.city].remove(old_contact)
             self.state_dict[old_contact.state].remove(old_contact)
             self.zip_code_dict[old_contact.zip_code].remove(old_contact)
-        
+
+    def _add_new_contact(self, contact):
         self.city_dict[contact.city].add(contact)
         self.state_dict[contact.state].add(contact)
         self.zip_code_dict[contact.zip_code].add(contact)
+        self.contacts[contact.first_name] = contact
 
     def update_contact(self, name, field_name, new_value):
         if name not in self.contacts:
@@ -108,17 +108,11 @@ class AddressBook:
         if field_name == "address":
             contact.address = new_value
         elif field_name == "city":
-            self.city_dict[contact.city].remove(contact)
-            contact.city = new_value
-            self.city_dict[contact.city].add(contact)
+            self._update_contact_city(contact, new_value)
         elif field_name == "state":
-            self.state_dict[contact.state].remove(contact)
-            contact.state = new_value
-            self.state_dict[contact.state].add(contact)
+            self._update_contact_state(contact, new_value)
         elif field_name == "zip_code":
-            self.zip_code_dict[contact.zip_code].remove(contact)
-            contact.zip_code = new_value
-            self.zip_code_dict[contact.zip_code].add(contact)
+            self._update_contact_zip_code(contact, new_value)
         elif field_name == "phone_number":
             contact.phone_number = new_value
         elif field_name == "email":
@@ -131,18 +125,25 @@ class AddressBook:
         print(contact.display_contact())
         print("-----------------------------------------------------")
 
+    def _update_contact_city(self, contact, new_city):
+        self.city_dict[contact.city].remove(contact)
+        contact.city = new_city
+        self.city_dict[contact.city].add(contact)
+
+    def _update_contact_state(self, contact, new_state):
+        self.state_dict[contact.state].remove(contact)
+        contact.state = new_state
+        self.state_dict[contact.state].add(contact)
+
+    def _update_contact_zip_code(self, contact, new_zip_code):
+        self.zip_code_dict[contact.zip_code].remove(contact)
+        contact.zip_code = new_zip_code
+        self.zip_code_dict[contact.zip_code].add(contact)
+
     def delete_contact(self, name):
         if name in self.contacts:
             contact = self.contacts.pop(name)
-            self.city_dict[contact.city].remove(contact)
-            if not self.city_dict[contact.city]:
-                del self.city_dict[contact.city]
-            self.state_dict[contact.state].remove(contact)
-            if not self.state_dict[contact.state]:
-                del self.state_dict[contact.state]
-            self.zip_code_dict[contact.zip_code].remove(contact)
-            if not self.zip_code_dict[contact.zip_code]:
-                del self.zip_code_dict[contact.zip_code]
+            self._remove_old_contact(contact)
             print(f"Contact '{name}' has been deleted.")
         else:
             print("Contact not found.")
@@ -239,43 +240,34 @@ class AddressBook:
             print(f"No contacts found in {state}.")
         print(f"Total contacts in {state}: {len(contacts) if contacts else 0}")
 
-    def save_to_file(self, filename):
-        data = {
-            "contacts": [contact.to_dict() for contact in self.contacts.values()],
-            "city_dict": {city: [contact.to_dict() for contact in contacts] for city, contacts in self.city_dict.items()},
-            "state_dict": {state: [contact.to_dict() for contact in contacts] for state, contacts in self.state_dict.items()},
-            "zip_code_dict": {zip_code: [contact.to_dict() for contact in contacts] for zip_code, contacts in self.zip_code_dict.items()}
-        }
-        with open(filename, 'w') as file:
-            json.dump(data, file, indent=4)
+    def save_to_csv(self, filename):
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["first_name", "last_name", "address", "city", "state", "zip_code", "phone_number", "email"])
+            for contact in self.contacts.values():
+                writer.writerow([contact.first_name, contact.last_name, contact.address, contact.city, contact.state, contact.zip_code, contact.phone_number, contact.email])
 
-    def load_from_file(self, filename):
-        with open(filename, 'r') as file:
-            data = json.load(file)
-        
+    def load_from_csv(self, filename):
         self.contacts = {}
-        self.city_dict = defaultdict(set)
-        self.state_dict = defaultdict(set)
-        self.zip_code_dict = defaultdict(set)
+        self.city_dict.clear()
+        self.state_dict.clear()
+        self.zip_code_dict.clear()
 
-        for contact_data in data["contacts"]:
-            contact = Contact.from_dict(contact_data)
-            self.add_contact(contact)
+        with open(filename, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                contact = Contact(
+                    first_name=row["first_name"],
+                    last_name=row["last_name"],
+                    address=row["address"],
+                    city=row["city"],
+                    state=row["state"],
+                    zip_code=row["zip_code"],
+                    phone_number=row["phone_number"],
+                    email=row["email"]
+                )
+                self.add_contact(contact)
 
-        for city, contacts in data["city_dict"].items():
-            for contact_data in contacts:
-                contact = Contact.from_dict(contact_data)
-                self.city_dict[city].add(contact)
-
-        for state, contacts in data["state_dict"].items():
-            for contact_data in contacts:
-                contact = Contact.from_dict(contact_data)
-                self.state_dict[state].add(contact)
-
-        for zip_code, contacts in data["zip_code_dict"].items():
-            for contact_data in contacts:
-                contact = Contact.from_dict(contact_data)
-                self.zip_code_dict[zip_code].add(contact)
 
 class AddressBookManager:
     def __init__(self):
@@ -291,9 +283,10 @@ class AddressBookManager:
     def get_address_book(self, name):
         return self.address_books.get(name, None)
 
+
 def main_menu(manager):
     selected_address_book = None
-    
+
     while True:
         print("-------------------------------------------------\n")
         print("1. Add Address Book")
@@ -328,6 +321,7 @@ def main_menu(manager):
             break
         else:
             print("Invalid choice. Please try again.")
+
 
 def address_book_menu(address_book):
     while True:
@@ -409,17 +403,18 @@ def address_book_menu(address_book):
                 print("Invalid choice. Please try again.")
         elif choice == "8":
             filename = input("Enter filename to save address book: ")
-            address_book.save_to_file(filename)
+            address_book.save_to_csv(filename)
             print(f"Address book saved to {filename}.")
         elif choice == "9":
             filename = input("Enter filename to load address book from: ")
-            address_book.load_from_file(filename)
+            address_book.load_from_csv(filename)
             print(f"Address book loaded from {filename}.")
         elif choice == "10":
             print("-------------------Exiting Address Book Menu.------------------")
             break
         else:
             print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     manager = AddressBookManager()
