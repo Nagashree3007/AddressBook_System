@@ -4,8 +4,10 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC11-Ability to sort the entries in the address book alphabetically by Person’s name
+@Title: UC13-Ability to sort the entries in the address book by City, State, or Zip 
 """
+
+from collections import defaultdict
 
 class Contact:
     def __init__(self, first_name, last_name, address, city, state, zip_code, phone_number, email):
@@ -43,8 +45,9 @@ def get_integer_input(prompt):
 class AddressBook:
     def __init__(self):
         self.contacts = {}
-        self.city_dict = {}
-        self.state_dict = {}
+        self.city_dict = defaultdict(set)
+        self.state_dict = defaultdict(set)
+        self.zip_code_dict = defaultdict(set)
 
     def add_contact(self, contact):
         if contact.first_name in self.contacts:
@@ -61,18 +64,13 @@ class AddressBook:
     def _update_contact_dictionaries(self, contact):
         if contact.first_name in self.contacts:
             old_contact = self.contacts[contact.first_name]
-            if old_contact.city in self.city_dict:
-                self.city_dict[old_contact.city].remove(old_contact)
-            if old_contact.state in self.state_dict:
-                self.state_dict[old_contact.state].remove(old_contact)
+            self.city_dict[old_contact.city].remove(old_contact)
+            self.state_dict[old_contact.state].remove(old_contact)
+            self.zip_code_dict[old_contact.zip_code].remove(old_contact)
         
-        if contact.city not in self.city_dict:
-            self.city_dict[contact.city] = set()
         self.city_dict[contact.city].add(contact)
-
-        if contact.state not in self.state_dict:
-            self.state_dict[contact.state] = set()
         self.state_dict[contact.state].add(contact)
+        self.zip_code_dict[contact.zip_code].add(contact)
 
     def update_contact(self, name, field_name, new_value):
         if name not in self.contacts:
@@ -83,21 +81,17 @@ class AddressBook:
         if field_name == "address":
             contact.address = new_value
         elif field_name == "city":
-            if contact.city in self.city_dict:
-                self.city_dict[contact.city].remove(contact)
+            self.city_dict[contact.city].remove(contact)
             contact.city = new_value
-            if contact.city not in self.city_dict:
-                self.city_dict[contact.city] = set()
             self.city_dict[contact.city].add(contact)
         elif field_name == "state":
-            if contact.state in self.state_dict:
-                self.state_dict[contact.state].remove(contact)
+            self.state_dict[contact.state].remove(contact)
             contact.state = new_value
-            if contact.state not in self.state_dict:
-                self.state_dict[contact.state] = set()
             self.state_dict[contact.state].add(contact)
         elif field_name == "zip_code":
+            self.zip_code_dict[contact.zip_code].remove(contact)
             contact.zip_code = new_value
+            self.zip_code_dict[contact.zip_code].add(contact)
         elif field_name == "phone_number":
             contact.phone_number = new_value
         elif field_name == "email":
@@ -113,14 +107,15 @@ class AddressBook:
     def delete_contact(self, name):
         if name in self.contacts:
             contact = self.contacts.pop(name)
-            if contact.city in self.city_dict:
-                self.city_dict[contact.city].remove(contact)
-                if not self.city_dict[contact.city]:
-                    del self.city_dict[contact.city]
-            if contact.state in self.state_dict:
-                self.state_dict[contact.state].remove(contact)
-                if not self.state_dict[contact.state]:
-                    del self.state_dict[contact.state]
+            self.city_dict[contact.city].remove(contact)
+            if not self.city_dict[contact.city]:
+                del self.city_dict[contact.city]
+            self.state_dict[contact.state].remove(contact)
+            if not self.state_dict[contact.state]:
+                del self.state_dict[contact.state]
+            self.zip_code_dict[contact.zip_code].remove(contact)
+            if not self.zip_code_dict[contact.zip_code]:
+                del self.zip_code_dict[contact.zip_code]
             print(f"Contact '{name}' has been deleted.")
         else:
             print("Contact not found.")
@@ -170,17 +165,35 @@ class AddressBook:
         if not self.contacts:
             print("No contacts available.")
         else:
-            # Sort contacts by last name, then first name
             sorted_contacts = sorted(self.contacts.values(), key=lambda c: (c.last_name, c.first_name))
             print("\n-----------------Contacts in Address Book:------------")
             for contact in sorted_contacts:
                 print(contact.display_contact())
+            print("-----------------------------------------------------")
+
+    def sort_and_display_contacts(self, attribute):
+        if attribute == "city":
+            sorted_contacts = sorted((contact for contacts in self.city_dict.values() for contact in contacts),
+                                     key=lambda c: (c.city, c.last_name, c.first_name))
+        elif attribute == "state":
+            sorted_contacts = sorted((contact for contacts in self.state_dict.values() for contact in contacts),
+                                     key=lambda c: (c.state, c.last_name, c.first_name))
+        elif attribute == "zip":
+            sorted_contacts = sorted((contact for contacts in self.zip_code_dict.values() for contact in contacts),
+                                     key=lambda c: (c.zip_code, c.last_name, c.first_name))
+        else:
+            print("Invalid sort attribute.")
+            return
+
+        print(f"\n-----------------Contacts sorted by {attribute.capitalize()}:------------")
+        for contact in sorted_contacts:
+            print(contact.display_contact())
+        print("-----------------------------------------------------")
 
     def view_contacts_by_city(self, city):
         contacts = self.city_dict.get(city, None)
         if contacts:
             print(f"Contacts in {city} ({len(contacts)}):")
-            # Sort contacts by last name, then first name
             sorted_contacts = sorted(contacts, key=lambda c: (c.last_name, c.first_name))
             for contact in sorted_contacts:
                 print(contact.display_contact())
@@ -192,7 +205,6 @@ class AddressBook:
         contacts = self.state_dict.get(state, None)
         if contacts:
             print(f"Contacts in {state} ({len(contacts)}):")
-            # Sort contacts by last name, then first name
             sorted_contacts = sorted(contacts, key=lambda c: (c.last_name, c.first_name))
             for contact in sorted_contacts:
                 print(contact.display_contact())
@@ -261,7 +273,8 @@ def address_book_menu(address_book):
         print("4. Display Contacts")
         print("5. View Contacts by City")
         print("6. View Contacts by State")
-        print("7. Exit")
+        print("7. Sort Contacts")
+        print("8. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -313,6 +326,21 @@ def address_book_menu(address_book):
             state = input("Enter state to view contacts: ")
             address_book.view_contacts_by_state(state)
         elif choice == "7":
+            print("Sort Contacts by:")
+            print("1. City")
+            print("2. State")
+            print("3. Zip Code")
+            sort_choice = input("Enter the number of your choice: ")
+
+            if sort_choice == "1":
+                address_book.sort_and_display_contacts("city")
+            elif sort_choice == "2":
+                address_book.sort_and_display_contacts("state")
+            elif sort_choice == "3":
+                address_book.sort_and_display_contacts("zip")
+            else:
+                print("Invalid choice. Please try again.")
+        elif choice == "8":
             print("-------------------Exiting Address Book Menu.------------------")
             break
         else:
