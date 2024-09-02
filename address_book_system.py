@@ -4,8 +4,7 @@
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC10-Ability to get number of contact persons i.e. count by City or State
-
+@Title: UC11-Ability to sort the entries in the address book alphabetically by Person’s name
 """
 
 class Contact:
@@ -171,14 +170,19 @@ class AddressBook:
         if not self.contacts:
             print("No contacts available.")
         else:
-            for contact in self.contacts.values():
+            # Sort contacts by last name, then first name
+            sorted_contacts = sorted(self.contacts.values(), key=lambda c: (c.last_name, c.first_name))
+            print("\n-----------------Contacts in Address Book:------------")
+            for contact in sorted_contacts:
                 print(contact.display_contact())
 
     def view_contacts_by_city(self, city):
         contacts = self.city_dict.get(city, None)
         if contacts:
             print(f"Contacts in {city} ({len(contacts)}):")
-            for contact in contacts:
+            # Sort contacts by last name, then first name
+            sorted_contacts = sorted(contacts, key=lambda c: (c.last_name, c.first_name))
+            for contact in sorted_contacts:
                 print(contact.display_contact())
         else:
             print(f"No contacts found in {city}.")
@@ -188,7 +192,9 @@ class AddressBook:
         contacts = self.state_dict.get(state, None)
         if contacts:
             print(f"Contacts in {state} ({len(contacts)}):")
-            for contact in contacts:
+            # Sort contacts by last name, then first name
+            sorted_contacts = sorted(contacts, key=lambda c: (c.last_name, c.first_name))
+            for contact in sorted_contacts:
                 print(contact.display_contact())
         else:
             print(f"No contacts found in {state}.")
@@ -299,7 +305,6 @@ def address_book_menu(address_book):
                 name = input("Enter the name of the contact to delete: ")
                 address_book.delete_contact(name)
         elif choice == "4":
-            print("\n-----------------Contacts in Address Book:------------")
             address_book.display_contacts()
         elif choice == "5":
             city = input("Enter city to view contacts: ")
@@ -308,7 +313,7 @@ def address_book_menu(address_book):
             state = input("Enter state to view contacts: ")
             address_book.view_contacts_by_state(state)
         elif choice == "7":
-            print("Exiting address book menu.")
+            print("-------------------Exiting Address Book Menu.------------------")
             break
         else:
             print("Invalid choice. Please try again.")
