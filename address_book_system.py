@@ -238,7 +238,7 @@ def main_menu(manager):
 
         if choice == "1":
             name = input("Enter the name of the new address book: ")
-            manager.add_address_book(name)
+            manager.add_address_book(name) 
         elif choice == "2":
             if not manager.address_books:
                 print("No address books available.")
