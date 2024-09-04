@@ -1,12 +1,11 @@
 """
-
 @Author: Nagashree C R
 @Date: 29-08-2024
 @Last Modified by: Nagashree C R
 @Last Modified: 29-08-2024
-@Title: UC7-Ability to ensure there is no Duplicate Entry of the same Person in a particular Address Book - Duplicate Check is done
-
+@Title: UC8-Ability to search Person in a City or State across multiple Address Books
 """
+
 class Contact:
     # Represents a contact in the address book.
     def __init__(self, first_name, last_name, address, city, state, zip_code, phone_number, email):
@@ -21,7 +20,9 @@ class Contact:
 
     def __eq__(self, other):
         """
-        Overrides the equality operator to compare contacts based on their full name.
+        Definition: Overrides the equality operator to compare contacts based on their full name.
+        Parameter: other (Contact) - The contact to compare with.
+        Return: True if both contacts have the same first and last name, else False.
         """
         if isinstance(other, Contact):
             return (self.first_name, self.last_name) == (other.first_name, other.last_name)
@@ -29,14 +30,15 @@ class Contact:
 
     def __hash__(self):
         """
-        Overrides the hash function to allow the Contact class to be used in sets and dictionaries.
+        Definition: Overrides the hash function to allow the Contact class to be used in sets and dictionaries.
+        Return: Hash value based on first and last names.
         """
         return hash((self.first_name, self.last_name))
 
     def display_contact(self):
         """
-        Definition: Display the details
-        parameter: None
+        Definition: Display the details of the contact.
+        Parameter: None
         Return: Returns a formatted string of the contact's details.
         """
         return (f"Name: {self.first_name} {self.last_name}\n"
@@ -49,9 +51,9 @@ class Contact:
 
 def get_integer_input(prompt):
     """
-    Definition: Prompts the user for an integer input 
-    parameter: None
-    Return: returns the integer value.
+    Definition: Prompts the user for an integer input.
+    Parameter: prompt (str) - The prompt message to display.
+    Return: Returns the integer value entered by the user.
     """
     while True:
         try:
@@ -66,11 +68,9 @@ class AddressBook:
 
     def add_contact(self, contact):
         """
-        
         Definition: Adds a new contact to the address book if it does not already exist.
-        parameter: contact (Contact) - The contact to add.
+        Parameter: contact (Contact) - The contact to add.
         Return: None
-        
         """
         if contact.first_name in self.contacts:
             existing_contact = self.contacts[contact.first_name]
@@ -83,8 +83,7 @@ class AddressBook:
 
     def update_and_display_contact(self, contact, field_name, new_value):
         """
-        Updates a specific field of a contact and displays the updated contact details.
-        Definition: Updates a specific field of the contact and prints the updated details.
+        Definition: Updates a specific field of a contact and displays the updated contact details.
         Parameter: contact (Contact) - The contact to update.
                    field_name (str) - The field to update.
                    new_value (str or int) - The new value for the field.
@@ -125,7 +124,7 @@ class AddressBook:
     def edit_contact(self, name):
         """
         Definition: Edits an existing contact by name.
-        parameter: name (str) - The name of the contact to be edited.
+        Parameter: name (str) - The name of the contact to be edited.
         Return: None (updates the contact's details).
         """
         if not self.contacts:
@@ -183,6 +182,22 @@ class AddressBook:
             for contact in self.contacts.values():
                 print(contact.display_contact())
 
+    def search_by_city(self, city):
+        """
+        Definition: Searches for contacts in the specified city.
+        Parameter: city (str) - The city to search for.
+        Return: List of contacts in the specified city.
+        """
+        return [contact for contact in self.contacts.values() if contact.city.lower() == city.lower()]
+
+    def search_by_state(self, state):
+        """
+        Definition: Searches for contacts in the specified state.
+        Parameter: state (str) - The state to search for.
+        Return: List of contacts in the specified state.
+        """
+        return [contact for contact in self.contacts.values() if contact.state.lower() == state.lower()]
+
 class AddressBookManager:
     def __init__(self):
         self.address_books = {}
@@ -207,6 +222,21 @@ class AddressBookManager:
         """
         return self.address_books.get(name, None)
 
+    def search_all_address_books(self, city=None, state=None):
+        """
+        Definition: Searches for contacts in all address books based on city or state.
+        Parameter: city (str) - The city to search for.
+                   state (str) - The state to search for.
+        Return: List of contacts matching the city or state criteria.
+        """
+        results = []
+        for address_book in self.address_books.values():
+            if city:
+                results.extend(address_book.search_by_city(city))
+            if state:
+                results.extend(address_book.search_by_state(state))
+        return results
+
 def main_menu(manager):
     """
     Definition: Displays options to the user and processes their choice.
@@ -217,7 +247,8 @@ def main_menu(manager):
         print("-------------------------------------------------\n")
         print("1. Add Address Book")
         print("2. Select Address Book")
-        print("3. Exit")
+        print("3. Search Contacts")
+        print("4. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -243,6 +274,8 @@ def main_menu(manager):
             else:
                 print("Invalid selection. Please try again.")
         elif choice == "3":
+            search_menu(manager)
+        elif choice == "4":
             print("-------------------Exiting system.------------------")
             break
         else:
@@ -311,6 +344,42 @@ def address_book_menu(address_book):
             address_book.display_contacts()
         elif choice == "5":
             print("-------------------Exiting address book.------------------")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def search_menu(manager):
+    """
+    Definition: Provides options to search contacts in all address books.
+    Parameter: manager (AddressBookManager) - The address book manager.
+    Return: None
+    """
+    while True:
+        print("-------------------------------------------------\n")
+        print("1. Search by City")
+        print("2. Search by State")
+        print("3. Back to Main Menu")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            city = input("Enter the city to search: ")
+            results = manager.search_all_address_books(city=city)
+            if results:
+                print("\n--- Search Results by City ---")
+                for contact in results:
+                    print(contact.display_contact())
+            else:
+                print("No contacts found in the specified city.")
+        elif choice == "2":
+            state = input("Enter the state to search: ")
+            results = manager.search_all_address_books(state=state)
+            if results:
+                print("\n--- Search Results by State ---")
+                for contact in results:
+                    print(contact.display_contact())
+            else:
+                print("No contacts found in the specified state.")
+        elif choice == "3":
             break
         else:
             print("Invalid choice. Please try again.")
